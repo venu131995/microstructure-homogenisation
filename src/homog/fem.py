@@ -116,3 +116,40 @@ def laminate(n: int, f: float, axis: str = "x") -> np.ndarray:
     j, i = np.divmod(np.arange(n * n), n)
     coord = j if axis == "x" else i                         # layers parallel to the x axis -> vary in y
     return (coord < round(f * n)).astype(float)
+
+
+def conservation(k: np.ndarray, mesh: Mesh) -> dict:
+    """Energy and flux balances of the homogenisation cell problem.
+
+    Local:   nodal residual of the periodic equilibrium  K chi = F  (discrete div q = 0 at every node).
+    Global:  (i) Hill-Mandel energy consistency: K from the energy integral equals the volume-averaged flux
+                 response <q_i> for a unit gradient in j;
+             (ii) heat flux through every vertical (horizontal) section of the cell is the same for a
+                 gradient in x (y) -- what enters a periodic cell must leave it;
+             (iii) periodicity: the fluctuation chi has zero mean gradient (macroscopic gradient is exact).
+    """
+    n = mesh.n
+    K, E, d = homogenise(k, mesh, return_fields=True)
+    n2 = n * n
+    rows = np.repeat(mesh.edof, 4, axis=1).ravel()
+    cols = np.tile(mesh.edof, (1, 4)).ravel()
+    A = sp.csc_matrix(((k[:, None, None] * KE0[None]).reshape(n2, 16).ravel(), (rows, cols)), shape=(n2, n2))
+    out = {}
+    for c, name in enumerate(("x", "y")):
+        chi_e = CHI0.T[None, :, c] - d[:, :, c]                       # element values of the fluctuation chi
+        chi = np.zeros(n2); np.put(chi, mesh.edof.ravel(), chi_e.ravel())
+        F = np.zeros(n2)
+        np.add.at(F, mesh.edof.ravel(), (k[:, None] * (KE0 @ CHI0[c])[None]).ravel())
+        res = A @ chi - F
+        res[0] = 0.0                                                    # the pinned node
+        q = element_flux(k, d, c)
+        q_mean = -q.mean(axis=0)                                        # flux response to +unit gradient
+        q_main = q[:, c].reshape(n, n)
+        section = -q_main.sum(axis=0 if c == 0 else 1) / n              # flux through each column/row section
+        out[name] = {"nodal_residual_max_rel": float(np.abs(res).max() / np.abs(F).max()),
+                     "hill_mandel_rel": float(np.abs(q_mean - K[:, c]).max() / np.abs(K).max()),
+                     "section_flux_spread_rel": float((section.max() - section.min()) / abs(section.mean())),
+                     "mean_fluctuation_gradient": float(np.abs(0.5 * ((d[:, 1, c] - d[:, 0, c]) + (d[:, 2, c] - d[:, 3, c]))
+                                                             .mean() - (1.0 if c == 0 else 0.0)))}
+    out["symmetry_rel"] = float(abs(K[0, 1] - K[1, 0]) / np.abs(K).max())
+    return out

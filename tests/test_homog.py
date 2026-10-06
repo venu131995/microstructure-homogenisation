@@ -83,3 +83,15 @@ def test_design_beats_circle_and_approaches_bound():
     circle = eff(1 - circle_cell(30, 0.5), 1.0, 1e-3, 30)       # conductor matrix around an insulating disc
     assert np.trace(d.K) > np.trace(circle)
     assert d.bound_fraction > 0.9
+
+
+def test_local_and_global_flux_and_energy_balance():
+    from homog import conservation
+    rng = np.random.default_rng(5)
+    c = conservation(0.01 + rng.random(24 * 24), Mesh.periodic(24))
+    for case in ("x", "y"):
+        assert c[case]["nodal_residual_max_rel"] < 1e-10           # local equilibrium at every node
+        assert c[case]["hill_mandel_rel"] < 1e-10                  # energy = average flux response
+        assert c[case]["section_flux_spread_rel"] < 1e-10          # same heat flux through every section
+        assert c[case]["mean_fluctuation_gradient"] < 1e-12        # periodic fluctuation
+    assert c["symmetry_rel"] < 1e-12

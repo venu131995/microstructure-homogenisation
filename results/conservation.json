@@ -1,0 +1,47 @@
+{
+ "vol_0.3": {
+  "x": {
+   "nodal_residual_max_rel": 8.912127719912602e-15,
+   "hill_mandel_rel": 3.8107059083723834e-15,
+   "section_flux_spread_rel": 4.128264734070082e-15,
+   "mean_fluctuation_gradient": 0.0
+  },
+  "y": {
+   "nodal_residual_max_rel": 1.0749913284419883e-14,
+   "hill_mandel_rel": 7.938970642442466e-16,
+   "section_flux_spread_rel": 4.604602972616632e-15,
+   "mean_fluctuation_gradient": 7.093091546216278e-19
+  },
+  "symmetry_rel": 9.91602063612839e-18
+ },
+ "vol_0.5": {
+  "x": {
+   "nodal_residual_max_rel": 8.894615491046816e-15,
+   "hill_mandel_rel": 3.556077035506631e-15,
+   "section_flux_spread_rel": 3.0480660304342665e-15,
+   "mean_fluctuation_gradient": 0.0
+  },
+  "y": {
+   "nodal_residual_max_rel": 1.0294899566579265e-14,
+   "hill_mandel_rel": 2.878729028743463e-15,
+   "section_flux_spread_rel": 5.24944705241457e-15,
+   "mean_fluctuation_gradient": 4.934324553889585e-19
+  },
+  "symmetry_rel": 6.512419060530938e-18
+ },
+ "vol_0.7": {
+  "x": {
+   "nodal_residual_max_rel": 2.6212946113436392e-14,
+   "hill_mandel_rel": 2.2701054193812117e-15,
+   "section_flux_spread_rel": 5.984823378368645e-15,
+   "mean_fluctuation_gradient": 0.0
+  },
+  "y": {
+   "nodal_residual_max_rel": 1.6095593076469772e-14,
+   "hill_mandel_rel": 2.476478639324958e-15,
+   "section_flux_spread_rel": 8.461302017693601e-15,
+   "mean_fluctuation_gradient": 4.934324553889585e-19
+  },
+  "symmetry_rel": 7.478845912528465e-17
+ }
+}

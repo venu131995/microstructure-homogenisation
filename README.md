@@ -87,6 +87,22 @@ instead use graded microstructures and their real effective properties. The hole
 **percolation collapse** above ~78.5% coolant, where neighbouring holes touch and the metal network
 breaks (conductivity falls from 0.15 to 0.02).
 
+## Conservation and confidence
+
+`conservation()` in `fem.py` checks the solved cell problems (`results/conservation.json`, all three optimised cells):
+
+| Check | Meaning | Worst case |
+|---|---|---|
+| Nodal residual of K χ = F | local equilibrium (discrete ∇·q = 0) at every node | 1 × 10⁻¹⁴ |
+| Hill–Mandel consistency | K from the energy integral = volume-averaged flux response | 4 × 10⁻¹⁵ |
+| Section flux | identical heat flux through every column (row) of the cell | 5 × 10⁻¹⁵ |
+| Periodicity | the fluctuation χ adds no mean gradient | 5 × 10⁻¹⁹ |
+| Symmetry | K_xy = K_yx | 7 × 10⁻¹⁸ |
+
+Together with the exact-theorem verification above (laminates exact to 10⁻¹⁰, Dykhne, Keller, HS bounds),
+finite-difference-checked sensitivities, and a unit test enforcing these balances, this gives high confidence that
+the effective properties are right.
+
 ## Limitations and next steps
 
 - Conductivity only. Effective **permeability** of the same cells (a Stokes cell problem) would give both
@@ -105,19 +121,20 @@ breaks (conductivity falls from 0.15 to 0.02).
 | `scripts/run_homog.py` | Verification, optimal cells, material-law study → `results/`, `figures/` |
 | `scripts/make_animation.py` | Movie of the design evolving and heat flowing through it |
 
-**Tests (`tests/`, 8 passing):**
+**Tests (`tests/`, 9 passing):**
 - homogeneous material returns itself, and laminates are exact;
 - the tensor is symmetric positive-definite and lies within the Voigt/Reuss bounds;
 - the checkerboard converges toward Dykhne, and discs lie within the HS bounds;
 - sensitivities match finite differences;
 - symmetrisation is a projection, and the filter wraps periodically;
-- the optimiser beats a circular hole and exceeds 90% of the bound.
+- the optimiser beats a circular hole and exceeds 90% of the bound;
+- local and global flux and energy balances hold to round-off.
 
 ## Run
 
 ```bash
 pip install -r requirements.txt imageio-ffmpeg
-python -m pytest -q tests          # 8 tests, ~10 s
+python -m pytest -q tests          # 9 tests, ~15 s
 python scripts/run_homog.py        # ~2 min
 python scripts/make_animation.py   # ~1 min
 ```
